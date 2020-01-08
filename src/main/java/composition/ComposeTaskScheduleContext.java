@@ -14,13 +14,37 @@ public class ComposeTaskScheduleContext {
 		void exec();
 	}
 
-	static class MakeTheDomainsGreater implements AsyncTask {
+	interface TaskContextAnnotation {
+
+	}
+
+	interface GlobalTask extends TaskContextAnnotation {
+
+	}
+
+	interface UserTask extends TaskContextAnnotation {
+
+	}
+
+	interface TaskScheduleAnnotation {
+
+	}
+
+	interface RegularTask extends TaskScheduleAnnotation {
+
+	}
+
+	interface RateLimitedTask extends TaskScheduleAnnotation {
+
+	}
+
+	static class MakeTheDomainsGreater implements AsyncTask, GlobalTask {
 		@Override
 		public void exec() {
 		}
 	}
 
-	static class SyncUserDrive implements AsyncTask {
+	static class SyncUserDrive implements AsyncTask, UserTask, RegularTask {
 		@Override
 		public void exec() {
 		}
@@ -58,15 +82,21 @@ public class ComposeTaskScheduleContext {
 
 	public static void main(String[] args) {
 
-		TaskExec myRateLimitedUserTask = TaskExec.builder()
+		// Must specify the user; schedule policy choice hard coded, but may need to define schedule parameters
+		TaskExec myRegularUserTask = TaskExec.builder()
 				.asyncTask(new SyncUserDrive())
 				.context(withUser("john@doe.com"))
+				.build();
+
+		// No TaskScheduleAnnotation, so must specify a schedule policy
+		TaskExec myGlobalTaskRateLimited = TaskExec.builder()
+				.asyncTask(new MakeTheDomainsGreater())
 				.schedulePolicy(RateLimited)
 				.build();
 
-		TaskExec myRegularGlobalTask = TaskExec.builder()
+		// No TaskScheduleAnnotation, so can specify any schedule policy
+		TaskExec myGlobalTaskRegular = TaskExec.builder()
 				.asyncTask(new MakeTheDomainsGreater())
-				.context(Context.global())
 				.schedulePolicy(Regular)
 				.build();
 
