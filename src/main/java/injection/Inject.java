@@ -1,0 +1,5 @@
+package injection;
+
+@interface Inject {
+	
+}
